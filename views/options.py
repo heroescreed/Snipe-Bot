@@ -23,7 +23,7 @@ class Options(nextcord.ui.View):
                 channels.append(await interaction.guild.fetch_channel(id)) # Fetches channel and adds it to channels list
             except NotFound: # If channel has been deleted, remove it from the database list
                 remove_channel(interaction.guild_id, id)
-        embed.add_field(name="Channels added to list:", value=", ".join([i.mention for i in channels]), inline=False)
+        embed.add_field(name=f"Channels added to {get_channel_mode(interaction.guild_id)}:", value=", ".join([i.mention for i in channels]), inline=False)
         embed.add_field(name="Role Mode:", value=get_role_mode(interaction.guild_id).capitalize())
         roles: List[nextcord.Role] = []
         for id in get_roles(interaction.guild_id): # Iterates through each role id in the database list
@@ -32,7 +32,7 @@ class Options(nextcord.ui.View):
                 roles.append(role) # Adds role to roles list
             else: # If role not found remove it from the database list
                 remove_role(interaction.guild_id, id)
-        embed.add_field(name="Roles added to list:", value=", ".join([i.mention for i in roles]), inline=False)
+        embed.add_field(name=f"Roles added to {get_role_mode(interaction.guild_id)}:", value=", ".join([i.mention for i in roles]), inline=False)
         embed.set_footer(text="Coded by @heroescreed")
         embed.set_thumbnail(interaction.guild.icon.url if interaction.guild.icon else None) # Sets thumbnail to be guild icon, if it has one
         return embed
@@ -66,25 +66,25 @@ class Options(nextcord.ui.View):
     @nextcord.ui.button(label="Add Channel", style=nextcord.ButtonStyle.green, row=1)
     async def add_channel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:
         channelview = ChannelSelect(interaction.user.id) # Create channel select view object
-        msg = await interaction.send(embed=nextcord.Embed(title="Select Channel", description="Select the channel you wish to add to the list", colour=COLOUR_MAIN), view=channelview, ephemeral=True)
+        msg = await interaction.send(embed=nextcord.Embed(title="Select Channel", description=f"Select the channel you wish to add to the {get_channel_mode(interaction.guild_id)}", colour=COLOUR_MAIN), view=channelview, ephemeral=True)
         await channelview.wait() # Wait for a selection to be made
         if not channelview.value.id in get_channels(interaction.guild_id): # If channel id isnt in database list then add it to the database
             add_channel(interaction.guild_id, channelview.value.id)
-            await msg.edit(embed=create_success_embed(title="Success", description="Sucessfully added channel to the list"), view=None)
+            await msg.edit(embed=create_success_embed(title="Success", description=f"Sucessfully added channel to the {get_channel_mode(interaction.guild_id)}"), view=None)
         else: # If channel id is in database list then tell the user and do nothing
-            await msg.edit(embed=create_warning_embed(title="Warning", description="Channel was already in the list, no changes have been made"), view=None)
+            await msg.edit(embed=create_warning_embed(title="Warning", description=f"Channel was already in the {get_channel_mode(interaction.guild_id)}, no changes have been made"), view=None)
         await interaction.edit(embed=await self.__generate_embed(interaction)) # Regenerate options embed
 
     @nextcord.ui.button(label="Remove Channel", style=nextcord.ButtonStyle.red, row=1)
     async def remove_channel(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:
         channelview = ChannelSelect(interaction.user.id) # Create channel select view object
-        msg = await interaction.send(embed=nextcord.Embed(title="Select Channel", description="Select the channel you wish to remove from the list", colour=COLOUR_MAIN), view=channelview, ephemeral=True)
+        msg = await interaction.send(embed=nextcord.Embed(title="Select Channel", description=f"Select the channel you wish to remove from the {get_channel_mode(interaction.guild_id)}", colour=COLOUR_MAIN), view=channelview, ephemeral=True)
         await channelview.wait() # Wait for a selection to be made
         if channelview.value.id in get_channels(interaction.guild_id): # If channel id is in database list then remove it from the database
             remove_channel(interaction.guild_id, channelview.value.id)
-            await msg.edit(embed=create_success_embed(title="Success", description="Sucessfully removed channel from the list"), view=None)
+            await msg.edit(embed=create_success_embed(title="Success", description=f"Sucessfully removed channel from the {get_channel_mode(interaction.guild_id)}"), view=None)
         else: # If channel id isnt in database list then tell the user and do nothing
-            await msg.edit(embed=create_warning_embed(title="Warning", description="Channel was not in the list, no changes have been made"), view=None)
+            await msg.edit(embed=create_warning_embed(title="Warning", description=f"Channel was not in the {get_channel_mode(interaction.guild_id)}, no changes have been made"), view=None)
         await interaction.edit(embed=await self.__generate_embed(interaction)) # Regenerate options embed
 
     @nextcord.ui.button(label="Toggle Role Blacklist", style=nextcord.ButtonStyle.blurple, row=2)
@@ -103,23 +103,23 @@ class Options(nextcord.ui.View):
     @nextcord.ui.button(label="Add Role", style=nextcord.ButtonStyle.green, row=2)
     async def add_role(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:
         roleview = Role_Select(interaction.user.id) # Create role select view object
-        msg = await interaction.send(embed=nextcord.Embed(title="Select role", description="Select the role you wish to add to the list", colour=COLOUR_MAIN), view=roleview, ephemeral=True)
+        msg = await interaction.send(embed=nextcord.Embed(title="Select role", description=f"Select the role you wish to add to the {get_role_mode(interaction.guild_id)}", colour=COLOUR_MAIN), view=roleview, ephemeral=True)
         await roleview.wait() # Wait for a selection to be made
         if not roleview.value.id in get_roles(interaction.guild_id): # If role id isnt in database list then add it to the database
             add_role(interaction.guild_id, roleview.value.id)
-            await msg.edit(embed=create_success_embed(title="Success", description="Sucessfully added role to the list"), view=None)
+            await msg.edit(embed=create_success_embed(title="Success", description=f"Sucessfully added role to the {get_role_mode(interaction.guild_id)}"), view=None)
         else: # If role id is in database list then tell the user and do nothing
-            await msg.edit(embed=create_warning_embed(title="Warning", description="Role was already in the list, no changes have been made"), view=None)
+            await msg.edit(embed=create_warning_embed(title="Warning", description=f"Role was already in the {get_role_mode(interaction.guild_id)}, no changes have been made"), view=None)
         await interaction.edit(embed=await self.__generate_embed(interaction)) # Regenerate options embed
 
     @nextcord.ui.button(label="Remove Role", style=nextcord.ButtonStyle.red, row=2)
     async def remove_role(self, button: nextcord.ui.Button, interaction: nextcord.Interaction) -> None:
         roleview = Role_Select(interaction.user.id) # Create role select view object
-        msg = await interaction.send(embed=nextcord.Embed(title="Select Role", description="Select the role you wish to remove from the list", colour=COLOUR_MAIN), view=roleview, ephemeral=True)
+        msg = await interaction.send(embed=nextcord.Embed(title="Select Role", description=f"Select the role you wish to remove from the {get_role_mode(interaction.guild_id)}", colour=COLOUR_MAIN), view=roleview, ephemeral=True)
         await roleview.wait() # Wait for a selection to be made
         if roleview.value.id in get_roles(interaction.guild_id): # If role id is in database list then remove it from the database
             remove_role(interaction.guild_id, roleview.value.id)
-            await msg.edit(embed=create_success_embed(title="Success", description="Sucessfully removed role from the list"), view=None)
+            await msg.edit(embed=create_success_embed(title="Success", description=f"Sucessfully removed role from the {get_role_mode(interaction.guild_id)}"), view=None)
         else: # If role id isnt in database list then tell the user and do nothing
-            await msg.edit(embed=create_warning_embed(title="Warning!", description="Role was not in the list, no changes have been made"), view=None)
+            await msg.edit(embed=create_warning_embed(title="Warning!", description=f"Role was not in the {get_role_mode(interaction.guild_id)}, no changes have been made"), view=None)
         await interaction.edit(embed=await self.__generate_embed(interaction))  # Regenerate options embed
