@@ -27,7 +27,7 @@ class Settings(commands.Cog):
                 channels.append(await interaction.guild.fetch_channel(id)) # Fetches channel and adds it to channels list
             except NotFound: # If channel has been deleted, remove it from the database list
                 remove_channel(interaction.guild_id, id)
-        embed.add_field(name="Channels added to list:", value=", ".join([i.mention for i in channels]), inline=False)
+        embed.add_field(name=f"Channels added to {get_channel_mode(interaction.guild_id)}:", value=", ".join([i.mention for i in channels]), inline=False)
         embed.add_field(name="Role Mode:", value=get_role_mode(interaction.guild_id).capitalize())
         roles: List[nextcord.Role] = []
         for id in get_roles(interaction.guild_id): # Iterates through each role id in the database list
@@ -36,7 +36,7 @@ class Settings(commands.Cog):
                 roles.append(role) # Adds role to roles list
             else: # If role not found remove it from the database list
                 remove_role(interaction.guild_id, id)
-        embed.add_field(name="Roles added to list:", value=", ".join([i.mention for i in roles]), inline=False)
+        embed.add_field(name=f"Roles added to {get_role_mode(interaction.guild_id)}:", value=", ".join([i.mention for i in roles]), inline=False)
         embed.set_footer(text="Coded by @heroescreed")
         embed.set_thumbnail(interaction.guild.icon.url if interaction.guild.icon else None) # Sets thumbnail to be guild icon, if it has one
         await interaction.send(embed=embed, view=Options(interaction.user.id))
