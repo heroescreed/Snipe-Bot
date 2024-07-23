@@ -10,8 +10,8 @@ class Channel_Delete(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel: GuildChannel) -> None: # Runs when a channel is deleted
-        if channel.id in get_channels(channel.guild): # If channel is in database remove it, preventing future errors
-            remove_channel(channel.guild, channel.id)
+        if channel.id in get_channels(channel.guild.id): # If channel is in database remove it, preventing future errors
+            remove_channel(channel.guild.id, channel.id)
 
 def setup(client: Bot):
     client.add_cog(Channel_Delete(client))
